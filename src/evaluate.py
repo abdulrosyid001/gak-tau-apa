@@ -5,9 +5,6 @@ from datetime import datetime
 import os
 
 def evaluate():
-    # ======================
-    # Load data
-    # ======================
     df = pd.read_csv("data/processed.csv")
 
     X = df[["lag_1"]]
@@ -16,9 +13,6 @@ def evaluate():
     split = int(len(df) * 0.8)
     X_test, y_test = X.iloc[split:], y.iloc[split:]
 
-    # ======================
-    # Load model
-    # ======================
     with open("models/model.pkl", "rb") as f:
         model = pickle.load(f)
 
@@ -27,35 +21,33 @@ def evaluate():
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    metrics_row = pd.DataFrame([{
+    new_row = pd.DataFrame([{
         "date": today,
         "mae": mae
     }])
 
     file_path = "data/metrics.csv"
 
-    # ======================
-    # Handle CSV safely
-    # ======================
+    # =============================
+    # HANDLE METRICS FILE SAFELY
+    # =============================
     if os.path.exists(file_path):
         existing = pd.read_csv(file_path)
+
+        # 🔧 FIX jika file lama tidak punya header
+        if "date" not in existing.columns:
+            existing.columns = ["date", "mae"]
 
         # ❌ Cegah duplikasi tanggal
         if today in existing["date"].astype(str).values:
             print(f"⚠️ Metrics for {today} already exists. Skipped.")
             return
 
-        metrics_row.to_csv(
-            file_path,
-            mode="a",
-            header=False,
-            index=False
-        )
+        updated = pd.concat([existing, new_row], ignore_index=True)
+        updated.to_csv(file_path, index=False)
+
     else:
-        metrics_row.to_csv(
-            file_path,
-            index=False
-        )
+        new_row.to_csv(file_path, index=False)
 
     print(f"📈 MAE ({today}): {mae:.4f}")
 
