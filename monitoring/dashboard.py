@@ -11,7 +11,7 @@ if not os.path.exists("data/metrics.csv"):
     st.stop()
 
 df = pd.read_csv("data/metrics.csv")
-df["Date"] = pd.to_datetime(df["Date"])
+df["date"] = pd.to_datetime(df["date"])
 
 # =========================
 # METRIC SUMMARY
@@ -29,7 +29,7 @@ st.metric(
 st.subheader("Model Performance Over Time")
 
 st.line_chart(
-    df.set_index("Date")[["mae"]]
+    df.set_index("date")[["mae"]]
 )
 
 # =========================

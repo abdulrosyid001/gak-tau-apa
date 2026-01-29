@@ -19,17 +19,15 @@ def evaluate():
     preds = model.predict(X_test)
     mae = mean_absolute_error(y_test, preds)
 
-    metrics = {
+    metrics_row = pd.DataFrame([{
         "date": datetime.now().strftime("%Y-%m-%d"),
         "mae": mae
-    }
-
-    metrics_df = pd.DataFrame([metrics])
+    }])
 
     if os.path.exists("data/metrics.csv"):
-        metrics_df.to_csv("data/metrics.csv", mode="a", header=False, index=False)
+        metrics_row.to_csv("data/metrics.csv", mode="a", header=False, index=False)
     else:
-        metrics_df.to_csv("data/metrics.csv", index=False)
+        metrics_row.to_csv("data/metrics.csv", index=False)
 
     print(f"📈 MAE: {mae:.4f}")
 
