@@ -4,6 +4,8 @@ from sklearn.metrics import mean_absolute_error
 from datetime import datetime
 import os
 
+RESET_METRICS = False
+
 def evaluate():
     df = pd.read_csv("data/processed.csv")
 
@@ -27,6 +29,11 @@ def evaluate():
     }])
 
     file_path = "data/metrics.csv"
+
+    # 🔥 RESET SEKALI JIKA DIPERLUKAN
+    if RESET_METRICS and os.path.exists(file_path):
+        os.remove(file_path)
+        print("🧹 metrics.csv di-reset")
 
     # =============================
     # HANDLE METRICS FILE SAFELY
