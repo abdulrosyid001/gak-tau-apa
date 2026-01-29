@@ -48,3 +48,18 @@ jobs:
 
       - name: Deploy model
         run: python src/deploy.py
+
+  docker-test:
+    runs-on: ubuntu-latest
+    needs: ci
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t bbca-mlops .
+
+      - name: Run container (test)
+        run: |
+          docker run -d -p 8501:8501 bbca-mlops
+          sleep 15
