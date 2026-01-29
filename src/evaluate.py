@@ -5,6 +5,9 @@ from datetime import datetime
 import os
 
 def evaluate():
+    # ======================
+    # Load data
+    # ======================
     df = pd.read_csv("data/processed.csv")
 
     X = df[["lag_1"]]
@@ -13,23 +16,48 @@ def evaluate():
     split = int(len(df) * 0.8)
     X_test, y_test = X.iloc[split:], y.iloc[split:]
 
+    # ======================
+    # Load model
+    # ======================
     with open("models/model.pkl", "rb") as f:
         model = pickle.load(f)
 
     preds = model.predict(X_test)
     mae = mean_absolute_error(y_test, preds)
 
+    today = datetime.now().strftime("%Y-%m-%d")
+
     metrics_row = pd.DataFrame([{
-        "date": datetime.now().strftime("%Y-%m-%d"),
+        "date": today,
         "mae": mae
     }])
 
-    if os.path.exists("data/metrics.csv"):
-        metrics_row.to_csv("data/metrics.csv", mode="a", header=False, index=False)
-    else:
-        metrics_row.to_csv("data/metrics.csv", index=False)
+    file_path = "data/metrics.csv"
 
-    print(f"📈 MAE: {mae:.4f}")
+    # ======================
+    # Handle CSV safely
+    # ======================
+    if os.path.exists(file_path):
+        existing = pd.read_csv(file_path)
+
+        # ❌ Cegah duplikasi tanggal
+        if today in existing["date"].astype(str).values:
+            print(f"⚠️ Metrics for {today} already exists. Skipped.")
+            return
+
+        metrics_row.to_csv(
+            file_path,
+            mode="a",
+            header=False,
+            index=False
+        )
+    else:
+        metrics_row.to_csv(
+            file_path,
+            index=False
+        )
+
+    print(f"📈 MAE ({today}): {mae:.4f}")
 
 if __name__ == "__main__":
     evaluate()
